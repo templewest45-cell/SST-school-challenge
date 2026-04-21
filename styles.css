@@ -1,0 +1,689 @@
+:root {
+  --bg: #f5f1e8;
+  --panel: rgba(255, 251, 245, 0.88);
+  --ink: #1b1918;
+  --sub: #5f584e;
+  --primary: #ef7a42;
+  --primary-dark: #cb5b25;
+  --secondary: #1f8a70;
+  --sky: #5aa9e6;
+  --yellow: #f4c542;
+  --danger: #d95d39;
+  --line: rgba(27, 25, 24, 0.1);
+  --shadow: 0 18px 40px rgba(59, 42, 23, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Zen Maru Gothic", sans-serif;
+  font-size: 18px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 119, 0.45), transparent 28%),
+    radial-gradient(circle at top right, rgba(90, 169, 230, 0.25), transparent 24%),
+    linear-gradient(180deg, #fffaf2 0%, #f3ebdf 100%);
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.app-header,
+.screen-header,
+.progress-label-row,
+.combo-row,
+.action-bar-row,
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.action-bar-row[hidden] {
+  display: none;
+}
+
+.app-header {
+  margin-bottom: 20px;
+}
+
+.app-main {
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  padding: 28px;
+}
+
+.hero-copy h2,
+.screen-header h2,
+.summary-card h3,
+.settings-panel h3 {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.2;
+}
+
+.hero-copy h2 {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+}
+
+.screen-header h2 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.summary-card h3,
+.settings-panel h3 {
+  font-size: 1.45rem;
+}
+
+.hero-text,
+.choice-label,
+.small-label,
+.hint-box,
+.status-box,
+.judgement-box,
+.note-list,
+#homeSettingsSummary,
+#homeChallengeSummary {
+  color: var(--sub);
+}
+
+.hero-text,
+.hint-box,
+.status-box,
+.note-list,
+#homeSettingsSummary,
+#homeChallengeSummary {
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+.choice-label {
+  font-size: 1.18rem;
+  line-height: 1.6;
+}
+
+.hero-tag,
+.eyebrow,
+.small-label {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.build-badge {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  color: var(--sub);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+.hero-actions,
+.summary-grid,
+.card-grid,
+.play-layout,
+.execute-layout,
+.challenge-layout,
+.settings-grid,
+.teacher-screen-layout,
+.choice-grid,
+.judge-actions,
+.action-bars {
+  display: grid;
+  gap: 16px;
+}
+
+.hero-actions {
+  align-content: center;
+}
+
+.summary-grid,
+.execute-layout,
+.settings-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.play-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.summary-card,
+.prompt-panel,
+.choice-panel,
+.camera-panel,
+.action-panel,
+.challenge-panel,
+.settings-panel {
+  padding: 24px;
+}
+
+.card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.level-card {
+  padding: 20px;
+  border-radius: 26px;
+  min-height: 220px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  color: #fff;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.level-card:hover,
+.level-card:focus-visible,
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover {
+  transform: translateY(-2px);
+}
+
+.level-card p,
+.level-card h3 {
+  margin: 0;
+}
+
+.level-card h3 {
+  font-size: 1.55rem;
+  line-height: 1.35;
+}
+
+.level-card p {
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button {
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 64px;
+  padding: 12px 24px;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: var(--primary);
+  color: #fff;
+}
+
+.secondary-button {
+  background: var(--secondary);
+  color: #fff;
+}
+
+.ghost-button {
+  min-height: 48px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.home-button {
+  min-height: 88px;
+  font-size: 1.55rem;
+}
+
+.screen-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.progress-block,
+.challenge-prompt-card {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-bar,
+.meter {
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(27, 25, 24, 0.08);
+  overflow: hidden;
+}
+
+.action-bar-row span:first-child {
+  width: 64px;
+  flex: 0 0 64px;
+}
+
+.action-bar-row .meter {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.progress-fill,
+.meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  transition: width 220ms ease;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--yellow), var(--primary));
+}
+
+.challenge-fill {
+  background: linear-gradient(90deg, #6ed49b, #1f8a70);
+}
+
+.scene-prompt,
+.instruction-text {
+  margin: 0;
+  font-size: clamp(1.85rem, 3vw, 2.8rem);
+  line-height: 1.5;
+}
+
+.scene-illustration {
+  min-height: 360px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.35), rgba(90, 169, 230, 0.25));
+  display: grid;
+  place-items: center;
+  font-size: 5rem;
+  overflow: hidden;
+}
+
+.scene-illustration-image {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  display: block;
+}
+
+.play-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.scene-illustration.feedback {
+  gap: 10px;
+  padding: 20px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 191, 105, 0.45), rgba(239, 122, 66, 0.22));
+}
+
+.scene-illustration.feedback.success {
+  background: linear-gradient(135deg, rgba(110, 212, 155, 0.42), rgba(90, 169, 230, 0.2));
+}
+
+.scene-illustration.feedback strong {
+  font-size: 1.7rem;
+}
+
+.scene-illustration.feedback span {
+  font-size: 4.2rem;
+  line-height: 1;
+}
+
+.hint-box,
+.status-box,
+.challenge-prompt-card {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px dashed rgba(27, 25, 24, 0.15);
+}
+
+.challenge-illustration-image {
+  min-height: 0;
+  max-height: 320px;
+  border-radius: 18px;
+  margin: 10px 0 14px;
+  object-fit: cover;
+}
+
+.teacher-screen-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.teacher-screen-panel {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px;
+  display: grid;
+  gap: 22px;
+}
+
+.teacher-screen-neutral {
+  background: rgba(255, 251, 245, 0.92);
+}
+
+.teacher-screen-success {
+  background: linear-gradient(135deg, rgba(110, 212, 155, 0.18), rgba(255, 251, 245, 0.95));
+}
+
+.teacher-screen-retry {
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.2), rgba(255, 251, 245, 0.95));
+}
+
+.teacher-screen-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.teacher-screen-avatar {
+  min-height: 320px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(90, 169, 230, 0.22), rgba(31, 138, 112, 0.18));
+  border: 1px solid rgba(27, 25, 24, 0.08);
+  display: grid;
+  place-items: center;
+}
+
+.teacher-screen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.teacher-screen-fallback {
+  font-size: 5rem;
+}
+
+.teacher-screen-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.teacher-screen-label,
+.teacher-screen-message,
+.teacher-screen-detail {
+  margin: 0;
+}
+
+.teacher-screen-label {
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: var(--sub);
+}
+
+.teacher-screen-message {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.teacher-screen-detail {
+  font-size: 1.18rem;
+  line-height: 1.8;
+  color: var(--sub);
+}
+
+.choice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-button {
+  min-height: 120px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 2px solid transparent;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choice-button strong,
+.choice-button span {
+  display: block;
+}
+
+.choice-button strong {
+  font-size: 1.28rem;
+  line-height: 1.45;
+}
+
+.choice-button span {
+  margin-top: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--sub);
+}
+
+.choice-button.is-selected {
+  border-color: var(--primary);
+  background: rgba(239, 122, 66, 0.08);
+}
+
+.perform-button {
+  width: 100%;
+}
+
+.perform-button[hidden] {
+  display: none;
+}
+
+.camera-frame {
+  position: relative;
+  min-height: 360px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #111;
+}
+
+#cameraPreview,
+.camera-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+#cameraPreview {
+  object-fit: cover;
+}
+
+.camera-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: #fff;
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(31, 138, 112, 0.85), rgba(90, 169, 230, 0.85));
+}
+
+.camera-fallback[hidden] {
+  display: none;
+}
+
+.countdown-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.countdown-value,
+.combo-value {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  margin: 0;
+}
+
+.meter-stop {
+  background: linear-gradient(90deg, #ffd166, #ef476f);
+}
+
+.meter-look {
+  background: linear-gradient(90deg, #73c2fb, #5aa9e6);
+}
+
+.meter-speak {
+  background: linear-gradient(90deg, #fcbf49, #f77f00);
+}
+
+.judge-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.challenge-panel {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.challenge-prompt-card {
+  min-height: 160px;
+  align-content: center;
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.settings-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.setting-item {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  align-items: center;
+}
+
+.setting-item select,
+.setting-item input[type="range"] {
+  width: min(280px, 45%);
+}
+
+.note-list {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.8;
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .summary-grid,
+  .play-layout,
+  .execute-layout,
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 17px;
+  }
+
+  .app-shell {
+    width: min(100% - 20px, 100%);
+    padding-top: 16px;
+  }
+
+  .app-header,
+  .screen-header,
+  .countdown-box,
+  .setting-item,
+  .combo-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .choice-grid,
+  .judge-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-screen-card {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-screen-avatar {
+    min-height: 220px;
+  }
+
+  .hero,
+  .summary-card,
+  .prompt-panel,
+  .choice-panel,
+  .camera-panel,
+  .action-panel,
+  .challenge-panel,
+  .settings-panel {
+    padding: 18px;
+  }
+
+  .scene-illustration {
+    min-height: 240px;
+    font-size: 4rem;
+  }
+
+  .scene-illustration-image {
+    min-height: 240px;
+  }
+
+  .camera-frame {
+    min-height: 240px;
+  }
+
+  .setting-item select,
+  .setting-item input[type="range"] {
+    width: 100%;
+  }
+}

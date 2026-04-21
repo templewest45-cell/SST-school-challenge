@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学校生活チャレンジ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">こうどうで まなぶ SST</p>
+        <h1>学校生活チャレンジ</h1>
+      </div>
+      <p class="build-badge">build 20260418-1926</p>
+      <button id="headerSettingsButton" class="ghost-button">せってい</button>
+    </header>
+
+    <main id="app" class="app-main" aria-live="polite"></main>
+  </div>
+
+  <template id="home-template">
+    <section class="hero panel">
+      <div class="hero-copy">
+        <p class="hero-tag">4つのこうどうで れんしゅう</p>
+        <h2>とまる・みる・はなす・えらぶ</h2>
+        <p class="hero-text">やってみる ことを中心にした、学校生活のソーシャルスキルトレーニングです。</p>
+      </div>
+      <div class="hero-actions">
+        <button id="homeTrainingButton" class="primary-button home-button">れんしゅう</button>
+        <button id="homeChallengeButton" class="secondary-button home-button">チャレンジ</button>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="panel summary-card">
+        <h3>いまの せってい</h3>
+        <div id="homeSettingsSummary"></div>
+      </article>
+      <article class="panel summary-card">
+        <h3>チャレンジ きろく</h3>
+        <div id="homeChallengeSummary"></div>
+      </article>
+    </section>
+  </template>
+
+  <template id="training-list-template">
+    <section class="screen-header">
+      <button data-route="home" class="ghost-button">← もどる</button>
+      <div>
+        <p class="eyebrow">トレーニング</p>
+        <h2>れんしゅう を えらぶ</h2>
+      </div>
+    </section>
+    <section id="trainingCardGrid" class="card-grid"></section>
+  </template>
+
+  <template id="play-template">
+    <section class="screen-header">
+      <div class="screen-header-actions">
+        <button data-route="training-list" class="ghost-button">← もどる</button>
+        <button id="playSettingsButton" class="ghost-button">せってい</button>
+      </div>
+      <div>
+        <p id="playLevelBadge" class="eyebrow"></p>
+        <h2 id="playLevelTitle"></h2>
+      </div>
+    </section>
+
+    <section class="play-layout">
+      <article class="panel prompt-panel play-panel">
+        <div class="progress-block">
+          <div class="progress-label-row">
+            <span>がんばりメーター</span>
+            <span id="sceneProgressLabel"></span>
+          </div>
+          <div class="progress-bar">
+            <div id="sceneProgressFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <p id="scenePrompt" class="scene-prompt"></p>
+        <div id="sceneIllustration" class="scene-illustration" aria-hidden="true"></div>
+        <div id="hintBox" class="hint-box"></div>
+        <p class="choice-label">えらんで みよう</p>
+        <div id="choiceGrid" class="choice-grid"></div>
+        <button id="performButton" class="primary-button perform-button">やってみる</button>
+      </article>
+    </section>
+  </template>
+
+  <template id="teacher-feedback-template">
+    <section class="screen-header">
+      <div>
+        <p class="eyebrow">せんせいの かいせつ</p>
+        <h2 id="teacherFeedbackTitle"></h2>
+      </div>
+    </section>
+
+    <section class="teacher-screen-layout">
+      <article class="panel teacher-screen-panel">
+        <div class="teacher-screen-card">
+          <div class="teacher-screen-avatar">
+            <img id="teacherScreenImage" class="teacher-screen-image" alt="せんせい">
+            <div id="teacherScreenFallback" class="teacher-screen-fallback" hidden>👩‍🏫</div>
+          </div>
+          <div class="teacher-screen-copy">
+            <p class="teacher-screen-label">せんせいから</p>
+            <p id="teacherFeedbackMessage" class="teacher-screen-message"></p>
+            <p id="teacherFeedbackDetail" class="teacher-screen-detail"></p>
+          </div>
+        </div>
+        <button id="teacherFeedbackContinueButton" class="primary-button">つぎへ</button>
+      </article>
+    </section>
+  </template>
+
+  <template id="execute-template">
+    <section class="screen-header">
+      <button id="backToPlayButton" class="ghost-button">← もどる</button>
+      <div>
+        <p class="eyebrow">こうどう じっこう</p>
+        <h2 id="executeTitle"></h2>
+      </div>
+    </section>
+
+    <section class="execute-layout">
+      <article class="panel camera-panel">
+        <div class="camera-frame">
+          <video id="cameraPreview" playsinline autoplay muted></video>
+          <div id="cameraFallback" class="camera-fallback">カメラを つかうと ここに うつります</div>
+        </div>
+        <div class="countdown-box">
+          <p id="executeInstruction" class="instruction-text"></p>
+          <div id="countdownValue" class="countdown-value">3</div>
+        </div>
+      </article>
+
+      <article class="panel action-panel">
+        <div class="progress-block">
+          <div class="progress-label-row">
+            <span>この めんの しんちょく</span>
+            <span id="executeSceneProgress"></span>
+          </div>
+          <div class="progress-bar">
+            <div id="executeSceneFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="action-bars">
+          <div id="stopBarRow" class="action-bar-row">
+            <span>とまる</span>
+            <div class="meter"><div id="stopMeter" class="meter-fill meter-stop"></div></div>
+          </div>
+          <div id="lookBarRow" class="action-bar-row">
+            <span>みる</span>
+            <div class="meter"><div id="lookMeter" class="meter-fill meter-look"></div></div>
+          </div>
+          <div id="speakBarRow" class="action-bar-row">
+            <span>はなす</span>
+            <div class="meter"><div id="speakMeter" class="meter-fill meter-speak"></div></div>
+          </div>
+        </div>
+
+        <div id="executeStatus" class="status-box">じゅんび しています</div>
+        <div class="judge-actions">
+          <button id="teacherSuccessButton" class="primary-button">できた</button>
+          <button id="teacherFailButton" class="secondary-button">もういちど</button>
+        </div>
+      </article>
+    </section>
+  </template>
+
+  <template id="challenge-template">
+    <section class="screen-header">
+      <button id="challengeBackButton" class="ghost-button">← もどる</button>
+      <div>
+        <p class="eyebrow">チャレンジモード</p>
+        <h2>れんぞく せいこうを めざそう</h2>
+      </div>
+    </section>
+
+    <section class="challenge-layout">
+      <article class="panel challenge-panel">
+        <div class="combo-row">
+          <div>
+            <p class="small-label">いまの コンボ</p>
+            <p id="challengeComboValue" class="combo-value">0</p>
+          </div>
+          <div>
+            <p class="small-label">ベスト</p>
+            <p id="challengeBestValue" class="combo-value">0</p>
+          </div>
+        </div>
+
+        <div class="progress-block">
+          <div class="progress-label-row">
+            <span>クリアまで</span>
+            <span id="challengeGoalLabel"></span>
+          </div>
+          <div class="progress-bar">
+            <div id="challengeGoalFill" class="progress-fill challenge-fill"></div>
+          </div>
+        </div>
+
+        <div id="challengePromptCard" class="challenge-prompt-card"></div>
+        <div id="challengeChoiceGrid" class="choice-grid"></div>
+        <button id="challengeActionButton" class="primary-button perform-button">この こうどうで すすむ</button>
+        <div id="challengeResultBox" class="judgement-box">ランダムしゅつだい です</div>
+      </article>
+    </section>
+  </template>
+
+  <template id="settings-template">
+    <section class="screen-header">
+      <button id="closeSettingsButton" class="ghost-button">← もどる</button>
+      <div>
+        <p class="eyebrow">せってい</p>
+        <h2>はんてい と ヒント</h2>
+      </div>
+    </section>
+
+    <section class="settings-grid">
+      <article class="panel settings-panel">
+        <label class="setting-item">
+          <span>はんてい ほうしき</span>
+          <select id="judgeModeSelect">
+            <option value="teacher">きょうし ほじょ</option>
+            <option value="ai">AI サポート</option>
+          </select>
+        </label>
+
+        <label class="setting-item">
+          <span>おんせい はんてい</span>
+          <select id="audioJudgeSelect">
+            <option value="on">ON</option>
+            <option value="off">OFF</option>
+          </select>
+        </label>
+
+        <label class="setting-item">
+          <span>ヒント ひょうじ</span>
+          <select id="hintSelect">
+            <option value="on">ON</option>
+            <option value="off">OFF</option>
+          </select>
+        </label>
+
+        <label class="setting-item">
+          <span>じゅんび じかん</span>
+          <input id="countdownRange" type="range" min="2" max="30" step="1">
+          <strong id="countdownValueLabel"></strong>
+        </label>
+
+        <label class="setting-item">
+          <span>クリア ひつよう コンボ</span>
+          <input id="comboRange" type="range" min="3" max="5" step="1">
+          <strong id="comboValueLabel"></strong>
+        </label>
+
+        <button id="saveSettingsButton" class="primary-button">ほぞん</button>
+      </article>
+
+      <article class="panel settings-panel">
+        <h3>メモ</h3>
+        <ul class="note-list">
+          <li>AI サポートでは、マイク音量とカメラの簡易判定を使います。</li>
+          <li>とまる・みる は 教師補助ボタンで確実に進行できます。</li>
+          <li>カメラとマイクの許可がない場合も練習は続けられます。</li>
+        </ul>
+      </article>
+    </section>
+  </template>
+
+  <script src="./app.js?v=20260418-1926"></script>
+</body>
+</html>
