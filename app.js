@@ -1,5 +1,6 @@
 const STORAGE_KEY = "social-skill-app-state-v3";
 const TEACHER_ILLUSTRATION = "./teacher-guide.png";
+const START_DELAY_SECONDS = 5;
 
 const levelPalette = {
   start: "linear-gradient(135deg, #66bb6a, #2e7d32)",
@@ -279,7 +280,7 @@ const appState = {
     judgeMode: "teacher",
     audioJudge: "on",
     hints: "on",
-    countdownSeconds: 3,
+    actionDurationSeconds: 3,
     comboGoal: 3
   },
   media: {
@@ -303,6 +304,7 @@ const appState = {
 
 const appEl = document.querySelector("#app");
 const headerSettingsButton = document.querySelector("#headerSettingsButton");
+const orientationOverlay = document.querySelector("#orientationOverlay");
 
 function loadState() {
   try {
@@ -311,6 +313,9 @@ function loadState() {
     const saved = JSON.parse(raw);
     appState.challengeBest = saved.challengeBest ?? 0;
     appState.settings = { ...appState.settings, ...(saved.settings || {}) };
+    if (!appState.settings.actionDurationSeconds && saved.settings?.countdownSeconds) {
+      appState.settings.actionDurationSeconds = saved.settings.countdownSeconds;
+    }
   } catch (error) {
     console.warn("state load failed", error);
   }
@@ -339,8 +344,8 @@ function getCurrentScene() {
   return level.scenes[appState.sceneIndex] || level.scenes[0];
 }
 
-function getSceneCountdownSeconds(scene) {
-  return scene.countdownSeconds ?? appState.settings.countdownSeconds;
+function getSceneActionSeconds(scene) {
+  return scene.countdownSeconds ?? appState.settings.actionDurationSeconds;
 }
 
 function sceneProgress(level, index) {
@@ -365,6 +370,30 @@ function openChallenge(fromRoute, reset = false) {
   }
 
   setRoute("challenge");
+}
+
+function clearChallengeTransientState() {
+  appState.challengeActiveItem = null;
+  appState.selectedOptionId = null;
+}
+
+function getLevelTeacherGoal(level) {
+  switch (level.id) {
+    case "start":
+      return "教室に入って座り、先生を見て返事をすることができる。";
+    case "patience":
+      return "立ちたい・走りたい・触りたい気持ちをおさえて待つことができる。";
+    case "waiting":
+      return "順番を待ち、合図を見て、最後にことばをそえて行動することができる。";
+    case "friendship":
+      return "気になるときにことばで質問し、断られても落ち着いて待つことができる。";
+    default:
+      return `${level.goals.join("・")} ができる。`;
+  }
+}
+
+function getLevelPreviewImage(level) {
+  return level.scenes.find((scene) => scene.illustrationImage)?.illustrationImage || "";
 }
 
 function cloneTemplate(id) {
@@ -413,7 +442,7 @@ function renderHome() {
     <p>はんてい: ${appState.settings.judgeMode === "ai" ? "AI サポート" : "きょうし ほじょ"}</p>
     <p>おんせい: ${appState.settings.audioJudge === "on" ? "ON" : "OFF"}</p>
     <p>ヒント: ${appState.settings.hints === "on" ? "ON" : "OFF"}</p>
-    <p>じゅんび: ${appState.settings.countdownSeconds} びょう</p>
+    <p>とりくむ じかん: ${appState.settings.actionDurationSeconds} びょう</p>
   `;
 
   document.querySelector("#homeChallengeSummary").innerHTML = `
@@ -422,7 +451,7 @@ function renderHome() {
   `;
 
   document.querySelector("#homeTrainingButton").addEventListener("click", () => {
-    appState.selectedOptionId = null;
+    clearChallengeTransientState();
     setRoute("training-list");
   });
 
@@ -436,19 +465,26 @@ function renderTrainingList() {
   const grid = document.querySelector("#trainingCardGrid");
 
   levels.forEach((level) => {
+    const titleParts = level.title.split(" ");
+    const titlePrefix = titleParts.shift() || level.title;
+    const titleMain = titleParts.join(" ") || level.shortTitle;
+    const previewImage = getLevelPreviewImage(level);
     const button = document.createElement("button");
     button.className = "level-card";
     button.style.background = level.color;
     button.innerHTML = `
-      <p>${level.shortTitle}</p>
-      <h3>${level.title}</h3>
-      <p>${level.description}</p>
-      <p>${level.goals.join(" ・ ")}</p>
+      ${
+        previewImage
+          ? `<div class="level-card-visual"><img class="level-card-image" src="${previewImage}" alt="${level.title} のイメージ"></div>`
+          : ""
+      }
+      <h3>${titlePrefix}<br>${titleMain}</h3>
+      <p>${getLevelTeacherGoal(level)}</p>
     `;
     button.addEventListener("click", () => {
       appState.levelId = level.id;
       appState.sceneIndex = 0;
-      appState.selectedOptionId = null;
+      clearChallengeTransientState();
       appState.lastResult = "";
       appState.lastResultType = "neutral";
       setRoute("play");
@@ -460,6 +496,9 @@ function renderTrainingList() {
   challengeButton.className = "level-card";
   challengeButton.style.background = "linear-gradient(135deg, #ff8a65, #d84315)";
   challengeButton.innerHTML = `
+    <div class="level-card-visual level-card-visual-challenge">
+      <span>4つの こうどう</span>
+    </div>
     <p>さいしゅうチャレンジ</p>
     <h3>第5面 れんぞくチャレンジ</h3>
     <p>4つの こうどうを ランダムで ふくしゅう</p>
@@ -570,13 +609,6 @@ function renderPlay() {
       message: scene.choiceFeedback || "そっちで いいよ。",
       detail: getChoiceExplanation(scene),
       tone: "success",
-      title: "はなまる",
-      message: "がんばったね。3れんぞく せいこう できたよ。",
-      detail: "はなまる！ トップに もどろう。",
-      continueLabel: "トップへ",
-      title: "はなまる",
-      message: "がんばったね。3れんぞく せいこう できたよ。",
-      detail: "はなまる！ トップに もどって つぎの れんしゅうへ いこう。",
       continueLabel: "じっこう する",
       continueAction: "to-execute"
     });
@@ -624,6 +656,37 @@ function getChoiceExplanation(scene) {
 }
 
 function getSuccessExplanation(scene) {
+  switch (scene.id) {
+    case "start-1":
+      return "じぶんの せきに むかって じゅぎょうの じゅんびが できたね。 はじめに すわると、 きもちよく スタート できるよ。";
+    case "start-2":
+      return "はじまる まえに しずかに とまれたね。 すわって まてると、 じゅぎょうに きもちを むけやすいよ。";
+    case "start-3":
+      return "せんせいの ほうを しっかり みられたね。 まえを みると、 つぎの おはなしや あいずが わかりやすいよ。";
+    case "start-4":
+      return "なまえを よばれて へんじが できたね。 「はい」と つたえると、 じゅんびが できていることが わかるよ。";
+    case "patience-1":
+      return "たちたい きもちが あっても、 すわって まてたね。 がまんして まてると、 じゅぎょうが あんしんして すすむよ。";
+    case "patience-2":
+      return "はしりたく なっても、 あるいて すすむ えらびかたが できたね。 あんぜんを まもる だいじな こうどうだよ。";
+    case "patience-3":
+      return "きになる ものが あっても、 すぐ さわらずに がまん できたね。 いちど とまると、 トラブルを へらせるよ。";
+    case "waiting-1":
+      return "じゅんばんが くるまで しずかに まてたね。 まつことが できると、 みんなで きもちよく すすめるよ。";
+    case "waiting-2":
+      return "「まだだよ」の あとに あいずを よく みられたね。 みて たしかめると、 つぎの うごきが わかりやすいよ。";
+    case "waiting-3":
+      return "かえす ときに ことばを そえて つたえられたね。 ひとこと いうと、 ていねいに きもちが とどくよ。";
+    case "friendship-1":
+      return "きになる ときに、 ことばで やさしく しつもん できたね。 さわる まえに きくと、 ともだちも あんしん できるよ。";
+    case "friendship-2":
+      return "つかって いいか、 ちゃんと きいて つたえられたね。 ことばで たしかめると、 なかよく つかいやすいよ。";
+    case "friendship-3":
+      return "「いまは だめ」と いわれても、 おちついて まてたね。 そのばで がまん できると、 ともだちと いい かんけいを つくりやすいよ。";
+    default:
+      break;
+  }
+
   switch (scene.action) {
     case "stop":
       return "からだを とめて まつことが できたね。 がまんして まてると、 じゅぎょうや じゅんばんが うまく すすむよ。";
@@ -633,6 +696,27 @@ function getSuccessExplanation(scene) {
       return "ことばで つたえることが できたね。 きこえる こえで いうと、 きもちや おねがいが つたわりやすいよ。";
     default:
       return "その こうどうで だいじょうぶ。 いい やりかたが できたね。";
+  }
+}
+
+function getRetryExplanation(scene, inChallenge = false) {
+  switch (scene.action) {
+    case "stop":
+      return inChallenge
+        ? "おなじ もんだいで、 からだを しずかに とめて もういちど やってみよう。"
+        : "あしや てを しずかに して、 もう いちど おちついて やってみよう。";
+    case "look":
+      return inChallenge
+        ? "おなじ もんだいで、 せんせいや あいずの ほうを みて もういちど やってみよう。"
+        : "せんせいや あいずの ほうを むいて、 もう いちど やってみよう。";
+    case "speak":
+      return inChallenge
+        ? "おなじ もんだいで、 ことばを はっきり いって もういちど やってみよう。"
+        : "ことばを みじかく はっきり いって、 もう いちど やってみよう。";
+    default:
+      return inChallenge
+        ? "おなじ もんだいを もういちど じっせんしてみよう。"
+        : "もう いちど おちついて やってみよう。";
   }
 }
 
@@ -718,7 +802,7 @@ function handleTeacherFeedbackContinue() {
 
 function getExecuteInstruction(scene) {
   if (scene.action === "stop") {
-    return `${getSceneCountdownSeconds(scene)}びょう ${scene.timedInstruction || "まってみよう"}`;
+    return `${getSceneActionSeconds(scene)}びょう ${scene.timedInstruction || "まってみよう"}`;
   }
 
   if (scene.action === "speak") {
@@ -733,7 +817,7 @@ function getExecuteInstruction(scene) {
 
 function getSceneHint(scene) {
   if (scene.timedHint) {
-    return scene.timedHint.replace("{seconds}", String(getSceneCountdownSeconds(scene)));
+    return scene.timedHint.replace("{seconds}", String(getSceneActionSeconds(scene)));
   }
 
   return scene.hint;
@@ -753,8 +837,8 @@ function renderExecute() {
   document.querySelector("#executeInstruction").textContent = getExecuteInstruction(scene);
   document.querySelector("#executeSceneProgress").textContent = challengeItem ? "1 / 1" : `${appState.sceneIndex + 1} / ${level.scenes.length}`;
   document.querySelector("#executeSceneFill").style.width = challengeItem ? "100%" : `${sceneProgress(level, appState.sceneIndex)}%`;
-  document.querySelector("#countdownValue").textContent = String(getSceneCountdownSeconds(scene));
-  updateExecuteStatus(`${getSceneCountdownSeconds(scene)}びょう ごに スタート`);
+  document.querySelector("#countdownValue").textContent = String(START_DELAY_SECONDS);
+  updateExecuteStatus(`${START_DELAY_SECONDS}びょう ごに スタート`);
 
   stopBarRow.hidden = scene.action !== "stop";
   lookBarRow.hidden = scene.action !== "look";
@@ -854,7 +938,7 @@ async function ensureMedia(needAudio) {
 }
 
 function runCountdown(scene) {
-  let current = getSceneCountdownSeconds(scene);
+  let current = START_DELAY_SECONDS;
   document.querySelector("#countdownValue").textContent = String(current);
   updateExecuteStatus(`${current}びょう ごに スタート`);
 
@@ -952,7 +1036,7 @@ function startMeters(scene) {
   const speakMeter = document.querySelector("#speakMeter");
   const videoEl = document.querySelector("#cameraPreview");
   const startedAt = performance.now();
-  const durationMs = Math.max(getSceneCountdownSeconds(scene), 2) * 1000;
+  const durationMs = Math.max(getSceneActionSeconds(scene), 2) * 1000;
   let stopHoldRatio = 0;
   let lastTickAt = startedAt;
 
@@ -1108,7 +1192,7 @@ async function resolveScene(success, message) {
       openTeacherFeedback({
         title: "もういちど やってみよう",
         message,
-        detail: "おなじ もんだいを もういちど じっせんしてみよう。",
+        detail: getRetryExplanation(scene, true),
         tone: "retry",
         continueLabel: "もういちど",
         continueAction: "to-execute"
@@ -1119,7 +1203,7 @@ async function resolveScene(success, message) {
     openTeacherFeedback({
       title: "もういちど やってみよう",
       message,
-      detail: "せんせいの あいずを みながら、 もう いちど おちついて やってみよう。",
+      detail: getRetryExplanation(scene),
       tone: "retry",
       continueLabel: "もどって やりなおす",
       continueAction: "back-to-play"
@@ -1220,15 +1304,10 @@ function completeChallengeSuccess() {
   if (reachedGoal) {
     appState.challengeCombo = 0;
     openTeacherFeedback({
-      title: "チャレンジ クリア",
-      message: `${appState.settings.comboGoal} れんぞく せいこう できたね。`,
-      detail: "このまま つぎの もんだいに すすもう。",
-      tone: "success",
-      continueLabel: "つぎへ",
-      continueLabel: "トップへ",
       title: "はなまる",
-      message: "がんばったね。3れんぞく せいこう できたよ。",
-      detail: "はなまる！ トップに もどろう。",
+      message: `${appState.settings.comboGoal} れんぞく せいこう できたね。`,
+      detail: "はなまる！ トップに もどって つぎの れんしゅうへ いこう。",
+      tone: "success",
       continueLabel: "トップへ",
       continueAction: "to-home"
     });
@@ -1407,7 +1486,7 @@ function readSettingsFromControls() {
     judgeMode: judgeModeSelect.value,
     audioJudge: audioJudgeSelect.value,
     hints: hintSelect.value,
-    countdownSeconds: Number(countdownRange.value),
+    actionDurationSeconds: Number(countdownRange.value),
     comboGoal: Number(comboRange.value)
   };
 }
@@ -1426,9 +1505,9 @@ function renderSettings() {
   judgeModeSelect.value = appState.settings.judgeMode;
   audioJudgeSelect.value = appState.settings.audioJudge;
   hintSelect.value = appState.settings.hints;
-  countdownRange.value = String(appState.settings.countdownSeconds);
+  countdownRange.value = String(appState.settings.actionDurationSeconds);
   comboRange.value = String(appState.settings.comboGoal);
-  countdownValueLabel.textContent = `${appState.settings.countdownSeconds} びょう`;
+  countdownValueLabel.textContent = `${appState.settings.actionDurationSeconds} びょう`;
   comboValueLabel.textContent = `${appState.settings.comboGoal} れんぞく`;
 
   countdownRange.addEventListener("input", () => {
@@ -1461,7 +1540,37 @@ function renderSettings() {
   });
 }
 
+function shouldShowOrientationOverlay() {
+  const userAgent = navigator.userAgent || "";
+  const isTabletUa =
+    /iPad/i.test(userAgent) ||
+    (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent));
+
+  if (!isTabletUa) {
+    return false;
+  }
+
+  const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+  const shortestSide = Math.min(window.innerWidth, window.innerHeight);
+  const longestSide = Math.max(window.innerWidth, window.innerHeight);
+  const likelyTabletSize = shortestSide >= 600 && longestSide >= 800;
+  return likelyTabletSize && isPortrait;
+}
+
+function updateOrientationOverlay() {
+  if (!orientationOverlay) {
+    return;
+  }
+
+  const shouldShow = shouldShowOrientationOverlay();
+  orientationOverlay.hidden = !shouldShow;
+  document.body.classList.toggle("orientation-locked", shouldShow);
+}
+
 headerSettingsButton.addEventListener("click", () => openSettings(appState.route));
+window.addEventListener("resize", updateOrientationOverlay);
+window.addEventListener("orientationchange", updateOrientationOverlay);
 
 loadState();
 render();
+updateOrientationOverlay();

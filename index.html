@@ -7,16 +7,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=20260517-01">
 </head>
 <body>
+  <div id="orientationOverlay" class="orientation-overlay" hidden aria-live="polite" aria-label="画面の向きの案内">
+    <div class="orientation-card">
+      <p class="orientation-label">つかう まえに</p>
+      <h2>タブレットを よこに むけてください</h2>
+      <p class="orientation-text">たてがめん では みづらいので、 よこがめん にすると つかいやすく なります。</p>
+    </div>
+  </div>
   <div class="app-shell">
     <header class="app-header">
       <div>
         <p class="eyebrow">こうどうで まなぶ SST</p>
         <h1>学校生活チャレンジ</h1>
       </div>
-      <p class="build-badge">build 20260418-1926</p>
+      <p class="build-badge">バージョン 1.00</p>
       <button id="headerSettingsButton" class="ghost-button">せってい</button>
     </header>
 
@@ -251,7 +258,7 @@
         </label>
 
         <label class="setting-item">
-          <span>じゅんび じかん</span>
+          <span>とりくむ じかん</span>
           <input id="countdownRange" type="range" min="2" max="30" step="1">
           <strong id="countdownValueLabel"></strong>
         </label>
@@ -276,6 +283,6 @@
     </section>
   </template>
 
-  <script src="./app.js?v=20260418-1926"></script>
+  <script src="./app.js?v=20260517-01"></script>
 </body>
 </html>
